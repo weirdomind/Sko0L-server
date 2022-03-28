@@ -1,20 +1,20 @@
 // server to client
-interface ServerToClientEvents {
+export interface ServerToClientEvents {
     message: (message: string) => void;
     noArg: () => void;
 }
 
 // client to server
-interface ClientToServerEvents {
+export interface ClientToServerEvents {
     message: (message: string) => void;
 }
 
 // server to server
-interface InterServerEvents {
+export interface InterServerEvents {
     ping: () => void;
 }
 
-interface SocketData {
+export interface SocketData {
     name: string;
     age: number;
 }
