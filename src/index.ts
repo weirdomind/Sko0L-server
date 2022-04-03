@@ -12,6 +12,7 @@ import {
 } from "./socket";
 import cors from "cors";
 import morgan from "morgan";
+import MainRouter from "./routes";
 
 const PORT = process.env.PORT || 8080;
 const ISDEV = process.env.NODE_ENV !== "production";
@@ -25,23 +26,24 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 app.use(express.static("public"));
 
+// Database
+require("./database");
+
 // start listening
 const server = app.listen(PORT, () => {
   console.clear();
   console.log(
-    `   Server running on PORT: ${blink(
+    `    Server running on PORT: ${blink(
       colors.green.underline(PORT + "")
     )} at ${new Date().toLocaleString()} as ${colors.green(
       ISDEV ? "development" : "production"
     )} mode`
   );
-  console.log(colors.redBright("   Press Ctrl+C to quit."));
+  console.log(colors.redBright("    Press Ctrl+C to quit."));
 });
 
-// listen on /
-app.get("/", (req, res) => {
-  res.send({ LOL: "LOL" });
-});
+// Routes
+app.use(MainRouter);
 
 // make a socket server
 const io = new Server<
@@ -51,7 +53,7 @@ const io = new Server<
   SocketData
 >(server, {
   cors: {
-    origin: "*",
+    origin: "http://localhost:3000",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   },
 });
