@@ -53,7 +53,7 @@ const io = new Server<
   SocketData
 >(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "http://localhost:3000,https://mysko0l-api.herokuapp.com",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   },
 });
