@@ -22,7 +22,9 @@ const app = express();
 // Middlewares
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://mysko0l-api.herokuapp.com"],
+    origin: ISDEV
+      ? "http://localhost:3000"
+      : "https://mysko0l-api.herokuapp.com",
   })
 );
 app.use(express.json());
