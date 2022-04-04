@@ -3,7 +3,7 @@ import Student, { StudentInterface } from "../database/models/student";
 import validator from "validator";
 import { compare, hash } from "bcryptjs";
 import generateMultipleAvatars from "../utils/avatar";
-import { generateToken } from "../utils/jwt";
+import { generateToken, tokenDecoder as tokenDecoderr } from "../utils/jwt";
 
 const AuthRouter = Router();
 
@@ -141,6 +141,50 @@ AuthRouter.post(
         }
       }
     );
+  }
+);
+
+AuthRouter.post(
+  "/verifytoken",
+  (req: Request, res: Response, next: NextFunction) => {
+    const token = req.body.token;
+    if (!token) {
+      return res.json({
+        success: false,
+        message: "Token not found",
+        errors: ["Token not found"],
+      });
+    }
+    const decoded = tokenDecoderr(token);
+    if (decoded._id) {
+      Student.findById(decoded._id)
+        .then((student) => {
+          if (student) {
+            const newToken = generateToken(student._id, student.name);
+            return res.json({
+              success: true,
+              message: "Token verified successfully",
+              data: {
+                student,
+                token: newToken,
+              },
+            });
+          } else {
+            return res.json({
+              success: false,
+              message: "Token not verified",
+              errors: ["Token not verified"],
+            });
+          }
+        })
+        .catch(next);
+    } else {
+      return res.json({
+        success: false,
+        message: "Token not verified",
+        errors: ["Token not verified"],
+      });
+    }
   }
 );
 
