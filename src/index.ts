@@ -20,7 +20,11 @@ const ISDEV = process.env.NODE_ENV !== "production";
 const app = express();
 
 // Middlewares
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "https://mysko0l-api.herokuapp.com"],
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
