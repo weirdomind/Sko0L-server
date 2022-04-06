@@ -21,17 +21,6 @@ const app = express();
 
 // Middlewares
 app.use(cors());
-app.use(function (req, res, next) {
-  res.header(
-    "Access-Control-Allow-Origin",
-    ISDEV ? "http://localhost:8080" : "https://mysko0l-api.herokuapp.com"
-  );
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  next();
-});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
@@ -64,7 +53,9 @@ const io = new Server<
   SocketData
 >(server, {
   cors: {
-    origin: "*",
+    origin: ISDEV
+      ? "http://localhost:8080"
+      : "https://mysko0l-api.herokuapp.com",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   },
 });
