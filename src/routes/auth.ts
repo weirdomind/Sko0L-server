@@ -13,18 +13,18 @@ AuthRouter.post(
     const data: StudentInterface = req.body;
     //   validating data for student's signup
     const errs: string[] = [];
-
+    if (data.name) data.name = data.name.trim();
     if (!data.name || !((data.name + "").length >= 4))
-      errs.push("Invalid Name");
+      errs.push("name must be at least 4 characters");
     if (validator.isEmail(data.name + "")) errs.push("Name cannot be an Email");
     if (!data.email || !validator.isEmail(data.email + ""))
       errs.push("InValid Email");
     if (!data.password || !((data.password + "").length >= 8))
       errs.push("Invalid Password");
-    if (!data.grade) errs.push("Invalid Grade");
-    if (!(data.subjects.length >= 3)) errs.push("Invalid Subjects");
+    if (!data.grade) errs.push("please enter grade");
+    if (!(data.subjects.length >= 3)) errs.push("Please select subjects");
     if (!data.avatar || !validator.isURL(data.avatar + ""))
-      errs.push("Invalid Profile Picture");
+      errs.push("Please select an avatar");
 
     if (errs.length) {
       return res.json({
@@ -46,7 +46,7 @@ AuthRouter.post(
       // hashing the password
       hash(data.password, 10)
         .then((hash) => {
-          // creating student
+          // creating student in database
           const student = new Student({
             name: data.name,
             email: data.email,
@@ -55,11 +55,11 @@ AuthRouter.post(
             grade: data.grade,
             subjects: data.subjects,
           });
-
           // saving student
           student
             .save()
             .then((student: StudentInterface) => {
+              // creating a JWT
               const token = generateToken(student._id, student.name);
               res.status(200).json({
                 success: true,
@@ -93,7 +93,7 @@ AuthRouter.post(
     //   validating data for student's signin
     const errs: string[] = [];
     if (!data.nameOrEmail || !((data.nameOrEmail + "").trim().length >= 4))
-      errs.push("Invalid Credentials");
+      errs.push("Invalid Credential");
     if (!data.password || !((data.password + "").length >= 8))
       errs.push("Invalid Password");
 
@@ -104,6 +104,7 @@ AuthRouter.post(
         errors: errs,
       });
     }
+
     const isName = !validator.isEmail(data.nameOrEmail + "");
     Student.findOne(
       isName ? { name: data.nameOrEmail } : { email: data.nameOrEmail },
@@ -119,25 +120,29 @@ AuthRouter.post(
           });
         } else {
           // checking if password is correct
-          compare(data.password, student.password).then((isMatch) => {
-            if (isMatch) {
-              const token = generateToken(student._id, student.name);
-              res.status(200).json({
-                success: true,
-                message: "student signed in successfully",
-                data: {
-                  student,
-                  token,
-                },
-              });
-            } else {
-              return res.json({
-                success: false,
-                message: "Wrong Password",
-                errors: ["Wrong Password"],
-              });
-            }
-          });
+          compare(data.password, student.password)
+            .then((isMatch) => {
+              if (isMatch) {
+                const token = generateToken(student._id, student.name);
+                res.status(200).json({
+                  success: true,
+                  message: "student signed in successfully",
+                  data: {
+                    student,
+                    token,
+                  },
+                });
+              } else {
+                return res.json({
+                  success: false,
+                  message: "Wrong Password",
+                  errors: ["Wrong Password"],
+                });
+              }
+            })
+            .catch((err) => {
+              next(err);
+            });
         }
       }
     );
